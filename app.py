@@ -89,7 +89,7 @@ def generate_ito_theme():
     )
     
     response = client.chat.completions.create(
-        model="gpt-4o-mini", # miniに戻しました
+        model="gpt-4.1-nano",
         messages=[{"role": "system", "content": system_prompt}, {"role": "user", "content": user_prompt}],
         temperature=0.9 # ランダム性を高める
     )
@@ -163,9 +163,9 @@ elif st.session_state.game_status == "result":
             st.markdown(f'<div style="padding:15px; border-radius:10px; margin-bottom:10px; border:1px solid #ccc; text-align:center; font-weight:bold; color:#333;">{i}番目: {val}</div>', unsafe_allow_html=True)
 
     if st.session_state.final_order == correct_order:
-        st.balloons(); st.success("脱出成功！")
+        st.balloons(); st.success("おめでとう！成功！")
     else:
-        st.error("残念！ズレが発生しました。")
+        st.error("残念！失敗😢")
 
     if st.button("もう一度遊ぶ"):
         st.session_state.game_status = "setup"; st.rerun()
