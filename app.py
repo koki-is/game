@@ -163,7 +163,7 @@ elif st.session_state.game_status == "result":
             st.markdown(f'<div style="padding:15px; border-radius:10px; margin-bottom:10px; border:1px solid #ccc; text-align:center; font-weight:bold; color:#333;">{i}番目: {val}</div>', unsafe_allow_html=True)
 
     if st.session_state.final_order == correct_order:
-        st.balloons(); st.success("おめでとう！成功！")
+        st.balloons(); st.success("おめでとう！成功😊")
     else:
         st.error("残念！失敗😢")
 
