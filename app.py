@@ -170,7 +170,7 @@ elif st.session_state.game_status == "result":
 
     if st.session_state.final_order == correct_order:
         st.balloons()
-        st.success("脱出成功！完璧な連携でした！")
+        st.success("成功！完璧な連携でした！")
     else:
         st.error("残念！価値観のズレが発生しました。")
 
