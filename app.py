@@ -7,13 +7,13 @@ from streamlit_sortables import sort_items
 st.set_page_config(page_title="AI ito Game", page_icon="🃏")
 client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
-# プレイヤーごとのカラー（いただいた24色から代表的な色を選定）
+# プレイヤーごとのカラー（ご提示のリストから抽出した6色）
 PLAYER_COLORS = ["#A6D8E4", "#A5BFE8", "#AEBFD3", "#FFB6C1", "#E5B4D6", "#FFC4B8"]
 
-# --- スマホ・カードデザイン用の共通CSS ---
+# --- スマホ・カードデザイン用のCSS（赤背景を完全に除去） ---
 style_code = f"""
     <style>
-    /* 共通ボタン設定 */
+    /* 基本ボタンの設定 */
     .stButton > button {{
         width: 100%;
         height: 60px;
@@ -21,34 +21,40 @@ style_code = f"""
         border-radius: 12px !important;
     }}
     
-    /* プレイヤーカード（ドラッグ＆ドロップ）のデザインを正方形かつ大きく */
-    /* :hasセレクタで特定のテキストを含むコンテナをターゲット */
-    div[data-testid="stMarkdownContainer"]:has(p:contains("プレイヤー 1")) {{ background-color: {PLAYER_COLORS[0]}; }}
-    div[data-testid="stMarkdownContainer"]:has(p:contains("プレイヤー 2")) {{ background-color: {PLAYER_COLORS[1]}; }}
-    div[data-testid="stMarkdownContainer"]:has(p:contains("プレイヤー 3")) {{ background-color: {PLAYER_COLORS[2]}; }}
-    div[data-testid="stMarkdownContainer"]:has(p:contains("プレイヤー 4")) {{ background-color: {PLAYER_COLORS[3]}; }}
-    div[data-testid="stMarkdownContainer"]:has(p:contains("プレイヤー 5")) {{ background-color: {PLAYER_COLORS[4]}; }}
-    div[data-testid="stMarkdownContainer"]:has(p:contains("プレイヤー 6")) {{ background-color: {PLAYER_COLORS[5]}; }}
-
-    /* ドラッグ項目のスタイル設定（正方形の大きなカード） */
-    div[data-testid="stMarkdownContainer"]:has(p:contains("プレイヤー")) {{
-        border-radius: 20px;
-        color: black;
-        font-weight: bold;
-        width: 200px !important;
-        height: 200px !important;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin: 15px auto !important;
-        box-shadow: 4px 4px 10px rgba(0,0,0,0.2);
-        border: 3px solid rgba(255,255,255,0.5);
-        font-size: 24px !important;
+    /* 【最重要】ドラッグ＆ドロップ項目のスタイル書き換え */
+    /* デフォルトの赤背景やスタイルを強制上書き */
+    div[data-testid="stMarkdownContainer"] {{
+        background-color: transparent !important;
     }}
 
-    /* ドラッグリスト自体の余白調整 */
+    /* プレイヤーごとのカード色設定（1番目から6番目まで） */
+    div:has(> p:contains("プレイヤー 1")) {{ background-color: {PLAYER_COLORS[0]} !important; }}
+    div:has(> p:contains("プレイヤー 2")) {{ background-color: {PLAYER_COLORS[1]} !important; }}
+    div:has(> p:contains("プレイヤー 3")) {{ background-color: {PLAYER_COLORS[2]} !important; }}
+    div:has(> p:contains("プレイヤー 4")) {{ background-color: {PLAYER_COLORS[3]} !important; }}
+    div:has(> p:contains("プレイヤー 5")) {{ background-color: {PLAYER_COLORS[4]} !important; }}
+    div:has(> p:contains("プレイヤー 6")) {{ background-color: {PLAYER_COLORS[5]} !important; }}
+
+    /* ドラッグカードの共通形状設定（正方形に近い大きなカード） */
+    div:has(> p:contains("プレイヤー")) {{
+        color: black !important;
+        font-weight: bold !important;
+        width: 90% !important;
+        min-height: 120px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        margin: 10px auto !important;
+        border-radius: 20px !important;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1) !important;
+        font-size: 22px !important;
+        border: none !important;
+    }}
+
+    /* sortablesのデフォルト枠線を消す */
     .st-emotion-cache-12w0qpk {{
-        padding: 10px 0 !important;
+        background-color: transparent !important;
+        border: none !important;
     }}
     </style>
 """
@@ -60,8 +66,8 @@ if 'game_status' not in st.session_state:
     st.session_state.theme = ""
 
 def generate_ito_theme(category):
-    system_prompt = "あなたはボードゲーム『ito』のマスターです。主観によって評価が分かれる面白いお題を1つ生成してください。"
-    user_prompt = f"カテゴリー「{category}」で、itoのお題を作成してください。形式：『お題：〇〇（1＝××、100＝△△）』"
+    system_prompt = "あなたはボードゲーム『ito』のマスターです。主観によって評価が分かれる、会話が弾む面白いお題を1つ生成してください。"
+    user_prompt = f"カテゴリー「{category}」で、itoのお題を作成してください。\n形式：『お題：〇〇（1＝××、100＝△△）』"
     response = client.chat.completions.create(
         model="gpt-4o-mini",
         messages=[{"role": "system", "content": system_prompt}, {"role": "user", "content": user_prompt}],
@@ -71,13 +77,10 @@ def generate_ito_theme(category):
 
 # --- 1. 設定フェーズ ---
 if st.session_state.game_status == "setup":
-    st.title("🃏 AI ito (Card UI Ver.)")
+    st.title("🃏 AI ito (Custom UI)")
     
-    # 【追加】参加人数をプルダウンに変更
-    num_players = st.selectbox("参加人数を選んでください", [2, 3, 4, 5, 6], index=1)
-    
-    # 【追加】ジャンルに「恋愛」を追加
-    category = st.selectbox("ジャンル", ["人気・好感度", "恋愛", "強さ・能力", "日常・食べ物", "人生・価値観", "ロールプレイ"])
+    num_players = st.selectbox("参加人数", [2, 3, 4, 5, 6], index=1)
+    category = st.selectbox("ジャンル", ["人気・好感度", "恋愛", "強さ・能力", "日常・食べ物", "人生・価値観"])
     
     if st.button("ゲーム開始！"):
         st.session_state.numbers = random.sample(range(1, 101), num_players)
@@ -112,12 +115,13 @@ elif st.session_state.game_status == "sorting":
     # 並べ替え用ラベル
     player_labels = [f"プレイヤー {i+1}" for i in range(len(st.session_state.numbers))]
     
-    # 【改良】正方形カードのドラッグUI
+    # 改良されたドラッグUI
     sorted_labels = sort_items(player_labels, direction="vertical")
 
     if st.button("これで確定！"):
         final_numbers = []
         for label in sorted_labels:
+            # ラベルからプレイヤー番号を抽出
             idx = int(label.replace("プレイヤー ", "")) - 1
             final_numbers.append(st.session_state.numbers[idx])
         st.session_state.final_order = final_numbers
@@ -136,7 +140,7 @@ elif st.session_state.game_status == "result":
         for i, val in enumerate(st.session_state.final_order, 1):
             orig_idx = st.session_state.numbers.index(val)
             color = PLAYER_COLORS[orig_idx]
-            st.markdown(f'<div style="background-color:{color}; padding:15px; border-radius:10px; margin-bottom:10px; color:black; font-weight:bold; text-align:center; border:1px solid rgba(0,0,0,0.1);">{i}番目: {val}</div>', unsafe_allow_html=True)
+            st.markdown(f'<div style="background-color:{color}; padding:15px; border-radius:10px; margin-bottom:10px; color:black; font-weight:bold; text-align:center;">{i}番目: {val}</div>', unsafe_allow_html=True)
             
     with col2:
         st.write("### 正解（小さい順）")
