@@ -7,7 +7,7 @@ from streamlit_sortables import sort_items
 st.set_page_config(page_title="AI ito Game", page_icon="🃏")
 client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
-# プレイヤーごとのカラー（ご提示いただいたリストから各プレイヤーのメイン色を採用）
+# プレイヤーごとのカラー（いただいた24色から代表的な色を選定）
 PLAYER_COLORS = ["#A6D8E4", "#A5BFE8", "#AEBFD3", "#FFB6C1", "#E5B4D6", "#FFC4B8"]
 
 # --- スマホ・カードデザイン用の共通CSS ---
@@ -19,30 +19,36 @@ style_code = f"""
         height: 60px;
         font-size: 18px !important;
         border-radius: 12px !important;
-        margin-top: 10px;
     }}
     
-    /* 並べ替えカードの共通スタイル */
-    .st-emotion-cache-12w0qpk {{
-        padding: 0 !important;
-    }}
-    
-    /* 各プレイヤーカードの色付け（ドラッグ項目用） */
-    /* 注: モダンブラウザの :has セレクタを使用して中身のテキストで判定 */
-    div[data-testid="stMarkdownContainer"]:has(p:contains("プレイヤー 1")) {{ background-color: {PLAYER_COLORS[0]}; border-radius: 10px; padding: 15px; color: black; font-weight: bold; }}
-    div[data-testid="stMarkdownContainer"]:has(p:contains("プレイヤー 2")) {{ background-color: {PLAYER_COLORS[1]}; border-radius: 10px; padding: 15px; color: black; font-weight: bold; }}
-    div[data-testid="stMarkdownContainer"]:has(p:contains("プレイヤー 3")) {{ background-color: {PLAYER_COLORS[2]}; border-radius: 10px; padding: 15px; color: black; font-weight: bold; }}
-    div[data-testid="stMarkdownContainer"]:has(p:contains("プレイヤー 4")) {{ background-color: {PLAYER_COLORS[3]}; border-radius: 10px; padding: 15px; color: black; font-weight: bold; }}
-    div[data-testid="stMarkdownContainer"]:has(p:contains("プレイヤー 5")) {{ background-color: {PLAYER_COLORS[4]}; border-radius: 10px; padding: 15px; color: black; font-weight: bold; }}
-    div[data-testid="stMarkdownContainer"]:has(p:contains("プレイヤー 6")) {{ background-color: {PLAYER_COLORS[5]}; border-radius: 10px; padding: 15px; color: black; font-weight: bold; }}
+    /* プレイヤーカード（ドラッグ＆ドロップ）のデザインを正方形かつ大きく */
+    /* :hasセレクタで特定のテキストを含むコンテナをターゲット */
+    div[data-testid="stMarkdownContainer"]:has(p:contains("プレイヤー 1")) {{ background-color: {PLAYER_COLORS[0]}; }}
+    div[data-testid="stMarkdownContainer"]:has(p:contains("プレイヤー 2")) {{ background-color: {PLAYER_COLORS[1]}; }}
+    div[data-testid="stMarkdownContainer"]:has(p:contains("プレイヤー 3")) {{ background-color: {PLAYER_COLORS[2]}; }}
+    div[data-testid="stMarkdownContainer"]:has(p:contains("プレイヤー 4")) {{ background-color: {PLAYER_COLORS[3]}; }}
+    div[data-testid="stMarkdownContainer"]:has(p:contains("プレイヤー 5")) {{ background-color: {PLAYER_COLORS[4]}; }}
+    div[data-testid="stMarkdownContainer"]:has(p:contains("プレイヤー 6")) {{ background-color: {PLAYER_COLORS[5]}; }}
 
-    /* ドラッグ項目の高さを調整 */
-    div[data-testid="stMarkdownContainer"] {{
-        min-height: 70px;
+    /* ドラッグ項目のスタイル設定（正方形の大きなカード） */
+    div[data-testid="stMarkdownContainer"]:has(p:contains("プレイヤー")) {{
+        border-radius: 20px;
+        color: black;
+        font-weight: bold;
+        width: 200px !important;
+        height: 200px !important;
         display: flex;
         align-items: center;
         justify-content: center;
-        margin-bottom: 8px;
+        margin: 15px auto !important;
+        box-shadow: 4px 4px 10px rgba(0,0,0,0.2);
+        border: 3px solid rgba(255,255,255,0.5);
+        font-size: 24px !important;
+    }}
+
+    /* ドラッグリスト自体の余白調整 */
+    .st-emotion-cache-12w0qpk {{
+        padding: 10px 0 !important;
     }}
     </style>
 """
@@ -65,9 +71,13 @@ def generate_ito_theme(category):
 
 # --- 1. 設定フェーズ ---
 if st.session_state.game_status == "setup":
-    st.title("🃏 AI ito (Color Ver.)")
-    num_players = st.slider("参加人数", 2, 6, 3)
-    category = st.selectbox("ジャンル", ["人気・好感度", "強さ・能力", "日常・食べ物", "ロールプレイ"])
+    st.title("🃏 AI ito (Card UI Ver.)")
+    
+    # 【追加】参加人数をプルダウンに変更
+    num_players = st.selectbox("参加人数を選んでください", [2, 3, 4, 5, 6], index=1)
+    
+    # 【追加】ジャンルに「恋愛」を追加
+    category = st.selectbox("ジャンル", ["人気・好感度", "恋愛", "強さ・能力", "日常・食べ物", "人生・価値観", "ロールプレイ"])
     
     if st.button("ゲーム開始！"):
         st.session_state.numbers = random.sample(range(1, 101), num_players)
@@ -85,8 +95,8 @@ elif st.session_state.game_status == "playing":
         color = PLAYER_COLORS[i]
         with st.expander(f"👤 プレイヤー {i+1} の数字を確認"):
             st.markdown(f"""
-                <div style="background-color:{color}; padding:40px; border-radius:15px; text-align:center; border: 2px solid rgba(0,0,0,0.1);">
-                    <h1 style="color:black; margin:0; font-size: 60px;">{st.session_state.numbers[i]}</h1>
+                <div style="background-color:{color}; padding:50px; border-radius:20px; text-align:center; border: 2px solid rgba(0,0,0,0.1);">
+                    <h1 style="color:black; margin:0; font-size: 80px;">{st.session_state.numbers[i]}</h1>
                 </div>
             """, unsafe_allow_html=True)
 
@@ -97,12 +107,12 @@ elif st.session_state.game_status == "playing":
 # --- 3. 回答フェーズ（ドラッグ＆ドロップ） ---
 elif st.session_state.game_status == "sorting":
     st.header("🃏 カードを並べ替え")
-    st.write("小さい順に上から並べてください（スマホは長押しで移動）")
+    st.write("小さい順に上から並べてください。")
 
     # 並べ替え用ラベル
     player_labels = [f"プレイヤー {i+1}" for i in range(len(st.session_state.numbers))]
     
-    # ドラッグUIの表示
+    # 【改良】正方形カードのドラッグUI
     sorted_labels = sort_items(player_labels, direction="vertical")
 
     if st.button("これで確定！"):
@@ -124,21 +134,20 @@ elif st.session_state.game_status == "result":
     with col1:
         st.write("### あなたたちの予想")
         for i, val in enumerate(st.session_state.final_order, 1):
-            # 予想にもプレイヤーの色を反映
             orig_idx = st.session_state.numbers.index(val)
             color = PLAYER_COLORS[orig_idx]
-            st.markdown(f'<div style="background-color:{color}; padding:10px; border-radius:5px; margin-bottom:5px; color:black; font-weight:bold;">{i}番目: {val}</div>', unsafe_allow_html=True)
+            st.markdown(f'<div style="background-color:{color}; padding:15px; border-radius:10px; margin-bottom:10px; color:black; font-weight:bold; text-align:center; border:1px solid rgba(0,0,0,0.1);">{i}番目: {val}</div>', unsafe_allow_html=True)
             
     with col2:
         st.write("### 正解（小さい順）")
         for i, val in enumerate(correct_order, 1):
-            st.write(f"**{i}番目**: {val}")
+            st.markdown(f'<div style="padding:15px; border-radius:10px; margin-bottom:10px; border:1px solid #ccc; text-align:center;">{i}番目: **{val}**</div>', unsafe_allow_html=True)
 
     if st.session_state.final_order == correct_order:
         st.balloons()
         st.success("完璧です！おめでとうございます！")
     else:
-        st.error("残念！失敗です")
+        st.error("残念！価値観のズレが発生しました。")
 
     if st.button("もう一度遊ぶ"):
         st.session_state.game_status = "setup"
