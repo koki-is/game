@@ -10,9 +10,6 @@ from openai import OpenAI\
 \
 st.title("ChatGPT Web\uc0\u12469 \u12540 \u12499 \u12473 ")\
 \
-# API\uc0\u12461 \u12540 \u12398 \u35373 \u23450 \u65288 GitHub\u12395 \u20844 \u38283 \u12377 \u12427 \u38555 \u12399 \u32118 \u23550 \u12371 \u12371 \u12408 \u30452 \u25509 \u26360 \u12363 \u12394 \u12356 \u12391 \u12367 \u12384 \u12373 \u12356 \u65281 \u65289 \
-client = OpenAI(api_key="\uc0\u12354 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")\
-\
 # \uc0\u12518 \u12540 \u12470 \u12540 \u20837 \u21147 \
 user_input = st.text_input("ChatGPT\uc0\u12395 \u30456 \u35527 \u12377 \u12427 \u65306 ", placeholder="\u20170 \u26085 \u12398 \u29486 \u31435 \u12434 \u32771 \u12360 \u12390 ")\
 \
