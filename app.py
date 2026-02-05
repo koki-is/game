@@ -8,10 +8,10 @@ from streamlit_sortables import sort_items
 st.set_page_config(page_title="AI ito Game", page_icon="🃏", layout="centered")
 client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
-# プレイヤーごとのカラー（24色リストからの選定）
+# プレイヤーごとのカラー
 PLAYER_COLORS = ["#A6D8E4", "#A5BFE8", "#AEBFD3", "#FFB6C1", "#E5B4D6", "#FFC4B8"]
 
-# --- スタイルの注入（カードの正方形化・カラー同期） ---
+# --- スタイルの注入 ---
 st.markdown(f"""
     <style>
     /* 共通ボタン設定 */
@@ -160,7 +160,7 @@ elif st.session_state.game_status == "result":
     with col2:
         st.write("### 正解")
         for i, val in enumerate(correct_order, 1):
-            st.markdown(f'<div style="padding:15px; border-radius:10px; margin-bottom:10px; border:1px solid #ccc; text-align:center;">{i}番目: **{val}**</div>', unsafe_allow_html=True)
+            st.markdown(f'<div style="padding:15px; border-radius:10px; margin-bottom:10px; border:1px solid #ccc; text-align:center; font-weight:bold; color:#333;">{i}番目: {val}</div>', unsafe_allow_html=True)
 
     if st.session_state.final_order == correct_order:
         st.balloons(); st.success("脱出成功！")
