@@ -32,7 +32,8 @@ if 'game_status' not in st.session_state:
     st.session_state.game_status = "setup"
     st.session_state.numbers = []
     st.session_state.theme = ""
-    st.session_state.player_names = [] 
+    st.session_state.player_names = []
+    st.session_state.theme_history = []
 
 # --- 関数群 ---
 def load_themes():
@@ -41,18 +42,23 @@ def load_themes():
             return [line.strip() for line in f.readlines() if line.strip()]
     return ["アニメ・漫画の人気（1:人気ない-100:人気ある）"]
 
-def generate_ito_theme():
+def generate_ito_theme(history):
     example_list = load_themes()
     examples_str = "\n".join(example_list)
+    history_str = ", ".join(history) if history else "なし"
+    
     system_prompt = "あなたはボードゲーム『ito』のマスターです。プレイヤーが盛り上がるお題を作成してください。"
     user_prompt = (
         f"以下の『お手本』の質を参考に、ランダムなジャンルから新しいお題を1つだけ作成してください。\n\n"
         f"【お手本】\n{examples_str}\n\n"
+        f"【禁止事項】\n"
+        f"以下の「過去に出たお題」とは絶対に内容が被らないようにしてください。\n"
+        f"過去に出たお題：{history_str}\n\n"
         "【ルール】\n- 形式は必ず『お題：〇〇（1＝××、100＝△△）』としてください。\n"
         "- 客観的な数値で測れるものは禁止です。"
     )
     response = client.chat.completions.create(
-        model="gpt-4.1-nano",
+        model="gpt-4.1-nano", 
         messages=[{"role": "system", "content": system_prompt}, {"role": "user", "content": user_prompt}],
         temperature=0.9
     )
@@ -94,13 +100,18 @@ if st.session_state.game_status == "setup":
                 st.session_state.player_names = new_names
                 st.session_state.numbers = random.sample(range(1, 101), num_players)
                 with st.spinner("AIがお題を考えています..."):
-                    st.session_state.theme = generate_ito_theme()
+                    # 履歴を渡して生成
+                    new_theme = generate_ito_theme(st.session_state.theme_history)
+                    st.session_state.theme = new_theme
+                    # 履歴に追加
+                    st.session_state.theme_history.append(new_theme)
                 st.session_state.game_status = "playing"
                 st.rerun()
     
     with col_btn2:
         if st.button("名前をリセット"):
             st.session_state.player_names = []
+            st.session_state.theme_history = []
             st.rerun()
 
 # --- 2. プレイフェーズ ---
@@ -147,7 +158,7 @@ elif st.session_state.game_status == "result":
             st.markdown(f'<div style="padding:15px; border-radius:10px; margin-bottom:10px; border:1px solid #ccc; text-align:center; font-weight:bold; color:#333;">{i}: {val}</div>', unsafe_allow_html=True)
 
     if st.session_state.final_order == correct_order:
-        st.balloons(); st.success("おめでとう！成功😊")
+        st.balloons(); st.success(""おめでとう！成功😊")
     else:
         st.error("残念！失敗😢")
 
