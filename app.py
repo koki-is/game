@@ -66,7 +66,7 @@ def generate_ito_theme(history):
 
 # --- 1. 設定フェーズ ---
 if st.session_state.game_status == "setup":
-    st.title("🃏 AITO - 設定")
+    st.title("🃏 AITO")
     
     current_num = len(st.session_state.player_names) if st.session_state.player_names else 3
     num_players = st.selectbox("参加人数を選んでください", [2, 3, 4, 5, 6], index=[2, 3, 4, 5, 6].index(max(2, current_num)))
