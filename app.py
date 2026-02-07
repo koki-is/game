@@ -94,7 +94,6 @@ if st.session_state.game_status == "setup":
                     error_msg = f"「{n}」に日本語以外の文字が含まれています。"
                     break
             
-            # 重複チェック
             if not error_msg and len(new_names) != len(set(new_names)):
                 error_msg = "同じ名前は使用できません。重複しない名前を入力してください。"
             
@@ -112,7 +111,6 @@ if st.session_state.game_status == "setup":
     
     with col_btn2:
         if st.button("名前をリセット"):
-            # セッション状態から入力欄のデータを削除して初期化
             for i in range(6):
                 key = f"pname_{i}"
                 if key in st.session_state:
@@ -140,4 +138,35 @@ elif st.session_state.game_status == "sorting":
     sorted_labels = sort_items(st.session_state.player_names, direction="vertical")
 
     if st.button("これで確定！"):
-        st.session_state.final_order = [st.session_state.numbers[st.session_state.player_
+        st.session_state.final_order = [st.session_state.numbers[st.session_state.player_names.index(label)] for label in sorted_labels]
+        st.session_state.sorted_names_order = sorted_labels
+        st.session_state.game_status = "result"
+        st.rerun()
+
+# --- 4. 結果発表フェーズ ---
+elif st.session_state.game_status == "result":
+    st.header("🎉 結果発表")
+    st.subheader(f"{st.session_state.theme}")
+    correct_order = sorted(st.session_state.numbers)
+    
+    col1, col2 = st.columns(2)
+    with col1:
+        st.write("### 予想")
+        for i, name in enumerate(st.session_state.sorted_names_order):
+            val = st.session_state.final_order[i]
+            color = PLAYER_COLORS[st.session_state.player_names.index(name)]
+            st.markdown(f'<div style="background-color:{color}; padding:15px; border-radius:10px; margin-bottom:10px; color:#333; font-weight:bold; text-align:center;">{i+1}: {name} ({val})</div>', unsafe_allow_html=True)
+            
+    with col2:
+        st.write("### 正解")
+        for i, val in enumerate(correct_order, 1):
+            st.markdown(f'<div style="padding:15px; border-radius:10px; margin-bottom:10px; border:1px solid #ccc; text-align:center; font-weight:bold; color:#333;">{i}: {val}</div>', unsafe_allow_html=True)
+
+    if st.session_state.final_order == correct_order:
+        st.balloons(); st.success("おめでとう！成功😊")
+    else:
+        st.error("残念！失敗😢")
+
+    if st.button("もう一度遊ぶ"):
+        st.session_state.game_status = "setup"
+        st.rerun()
