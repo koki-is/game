@@ -93,6 +93,9 @@ if st.session_state.game_status == "setup":
                 if not is_japanese(n):
                     error_msg = f"「{n}」に日本語以外の文字が含まれています。"
                     break
+
+            if not error_msg and len(new_names) != len(set(new_names)):
+                error_msg = "同じ名前は使用できません。"
             
             if error_msg:
                 st.error(error_msg)
@@ -100,10 +103,8 @@ if st.session_state.game_status == "setup":
                 st.session_state.player_names = new_names
                 st.session_state.numbers = random.sample(range(1, 101), num_players)
                 with st.spinner("AIがお題を考えています..."):
-                    # 履歴を渡して生成
                     new_theme = generate_ito_theme(st.session_state.theme_history)
                     st.session_state.theme = new_theme
-                    # 履歴に追加
                     st.session_state.theme_history.append(new_theme)
                 st.session_state.game_status = "playing"
                 st.rerun()
