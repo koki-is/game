@@ -10,7 +10,7 @@ st.set_page_config(page_title="AI ito Game", page_icon="🃏", layout="centered"
 client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
 # プレイヤーごとのカラー
-PLAYER_COLORS = ["#A6D8E4", "#A5BFE8", "#AEBFD3", "#FFB6C1", "#E5B4D6", "#FFC4B8"]
+PLAYER_COLORS = ["#A6D8E4", "#FFB6C1", "#B5EAD7", "#A5BFE8", "#E5B4D6", "#FFC4B8"]
 
 def is_japanese(text):
     return re.fullmatch(r'[ぁ-んァ-ヶー一-龠]+', text) is not None
