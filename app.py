@@ -10,7 +10,7 @@ st.set_page_config(page_title="AI ito Game", page_icon="🃏", layout="centered"
 client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
 # プレイヤーごとのカラー
-PLAYER_COLORS = ["#FFB7B2", "#FFDAC1", "#E2F0CB", "#B5EAD7", "#C7CEEA", "#FF9AA2"]
+PLAYER_COLORS = ["#A6D8E4", "#A5BFE8", "#AEBFD3", "#FFB6C1", "#E5B4D6", "#FFC4B8"]
 
 def is_japanese(text):
     return re.fullmatch(r'[ぁ-んァ-ヶー一-龠]+', text) is not None
@@ -64,6 +64,15 @@ def generate_ito_theme(history):
     )
     return response.choices[0].message.content
 
+# リセット用のコールバック関数（ボタンが押された瞬間に実行される）
+def reset_players_action():
+    for i in range(6):
+        key = f"pname_{i}"
+        if key in st.session_state:
+            st.session_state[key] = "" # 直接空文字をセットして入力をクリア
+    st.session_state.player_names = []
+    st.session_state.theme_history = []
+
 # --- 1. 設定フェーズ ---
 if st.session_state.game_status == "setup":
     st.title("🃏 AITO")
@@ -94,6 +103,7 @@ if st.session_state.game_status == "setup":
                     error_msg = f"「{n}」に日本語以外の文字が含まれています。"
                     break
             
+            # 重複チェック
             if not error_msg and len(new_names) != len(set(new_names)):
                 error_msg = "同じ名前は使用できません。重複しない名前を入力してください。"
             
@@ -110,14 +120,8 @@ if st.session_state.game_status == "setup":
                 st.rerun()
     
     with col_btn2:
-        if st.button("名前をリセット"):
-            for i in range(6):
-                key = f"pname_{i}"
-                if key in st.session_state:
-                    del st.session_state[key]
-            st.session_state.player_names = []
-            st.session_state.theme_history = []
-            st.rerun()
+        # on_clickを使用して、再描画前に状態をクリアする
+        st.button("名前をリセット", on_click=reset_players_action)
 
 # --- 2. プレイフェーズ ---
 elif st.session_state.game_status == "playing":
