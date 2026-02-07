@@ -1,4 +1,4 @@
-import streamlit as st
+ streamlit as st
 import random
 import os
 import re
@@ -81,7 +81,7 @@ if st.session_state.game_status == "setup":
     num_players = st.selectbox("参加人数を選んでください", [2, 3, 4, 5, 6], index=[2, 3, 4, 5, 6].index(max(2, current_num)))
     
     st.write("---")
-    st.subheader("プレイヤー名を確認・入力")
+    st.subheader("プレイヤー名を入力")
 
     new_names = []
     cols = st.columns(2)
@@ -105,7 +105,7 @@ if st.session_state.game_status == "setup":
             
             # 重複チェック
             if not error_msg and len(new_names) != len(set(new_names)):
-                error_msg = "同じ名前は使用できません。重複しない名前を入力してください。"
+                error_msg = "同じ名前は使用できません。"
             
             if error_msg:
                 st.error(error_msg)
