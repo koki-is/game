@@ -64,12 +64,12 @@ def generate_ito_theme(history):
     )
     return response.choices[0].message.content
 
-# リセット用のコールバック関数（ボタンが押された瞬間に実行される）
+# リセット用のコールバック関数
 def reset_players_action():
     for i in range(6):
         key = f"pname_{i}"
         if key in st.session_state:
-            st.session_state[key] = "" # 直接空文字をセットして入力をクリア
+            st.session_state[key] = ""
     st.session_state.player_names = []
     st.session_state.theme_history = []
 
@@ -84,10 +84,12 @@ if st.session_state.game_status == "setup":
     st.subheader("プレイヤー名を入力")
 
     new_names = []
-    cols = st.columns(2)
     for i in range(num_players):
-        default_name = st.session_state.player_names[i] if i < len(st.session_state.player_names) else ""
+        if i % 2 == 0:
+            cols = st.columns(2)
+        
         with cols[i % 2]:
+            default_name = st.session_state.player_names[i] if i < len(st.session_state.player_names) else ""
             name = st.text_input(f"プレイヤー {i+1}", value=default_name, key=f"pname_{i}", placeholder="なまえ")
             new_names.append(name)
 
@@ -103,7 +105,6 @@ if st.session_state.game_status == "setup":
                     error_msg = f"「{n}」に日本語以外の文字が含まれています。"
                     break
             
-            # 重複チェック
             if not error_msg and len(new_names) != len(set(new_names)):
                 error_msg = "同じ名前は使用できません。"
             
@@ -135,7 +136,6 @@ elif st.session_state.game_status == "playing":
     st.write("")
 
     col1, col2 = st.columns(2)
-
     with col1:
         if st.button("並べ替え（回答）へ進む"):
             st.session_state.game_status = "sorting"
