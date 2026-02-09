@@ -125,22 +125,29 @@ if st.session_state.game_status == "setup":
 # --- 2. プレイフェーズ ---
 elif st.session_state.game_status == "playing":
     st.header(f"お題：\n{st.session_state.theme}")
-    
-    if st.button("🔄 お題を変える"):
-        with st.spinner("AIが新しいお題を考えています..."):
-            new_theme = generate_ito_theme(st.session_state.theme_history)
-            st.session_state.theme = new_theme
-            st.session_state.theme_history.append(new_theme)
-            st.rerun()
     st.write("---")
+
     for i, name in enumerate(st.session_state.player_names):
         color = PLAYER_COLORS[i]
         with st.expander(f"👤 {name} さんの数字を確認"):
             st.markdown(f'<div style="background-color:{color}; padding:50px; border-radius:20px; text-align:center;"><h1 style="color:#333; margin:0; font-size: 80px;">{st.session_state.numbers[i]}</h1><p style="color:#333; font-weight:bold;">{name} の数字</p></div>', unsafe_allow_html=True)
 
-    if st.button("並べ替え（回答）へ進む"):
-        st.session_state.game_status = "sorting"
-        st.rerun()
+    st.write("")
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+        if st.button("並べ替え（回答）へ進む"):
+            st.session_state.game_status = "sorting"
+            st.rerun()
+
+    with col2:
+        if st.button("🔄 お題を変える"):
+            with st.spinner("AIが新しいお題を考えています..."):
+                new_theme = generate_ito_theme(st.session_state.theme_history)
+                st.session_state.theme = new_theme
+                st.session_state.theme_history.append(new_theme)
+                st.rerun()
 
 # --- 3. 回答フェーズ ---
 elif st.session_state.game_status == "sorting":
