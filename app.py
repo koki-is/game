@@ -120,12 +120,18 @@ if st.session_state.game_status == "setup":
                 st.rerun()
     
     with col_btn2:
-        # on_clickを使用して、再描画前に状態をクリアする
         st.button("名前をリセット", on_click=reset_players_action)
 
 # --- 2. プレイフェーズ ---
 elif st.session_state.game_status == "playing":
     st.header(f"お題：\n{st.session_state.theme}")
+    
+    if st.button("🔄 お題を変える"):
+        with st.spinner("AIが新しいお題を考えています..."):
+            new_theme = generate_ito_theme(st.session_state.theme_history)
+            st.session_state.theme = new_theme
+            st.session_state.theme_history.append(new_theme)
+            st.rerun()
     st.write("---")
     for i, name in enumerate(st.session_state.player_names):
         color = PLAYER_COLORS[i]
