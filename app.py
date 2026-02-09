@@ -1,16 +1,3 @@
-import sys
-from streamlit.web.cli import main
-
-def handler(request):
-    sys.argv = [
-        "streamlit",
-        "run",
-        "app.py",
-        "--server.port", "8080",
-        "--server.address", "0.0.0.0",
-    ]
-    main()
-
 import streamlit as st
 import random
 import os
