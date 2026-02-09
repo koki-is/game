@@ -1,3 +1,15 @@
+st.components.v1.html(
+    f"""
+    <script>
+        window.parent.document.title = "AI ito Game";
+        var meta = window.parent.document.createElement('meta');
+        meta.setAttribute('property', 'og:title');
+        meta.content = "AI ito Game";
+        window.parent.document.getElementsByTagName('head')[0].appendChild(meta);
+    </script>
+    """,
+    height=0,
+)
 import streamlit as st
 import random
 import os
@@ -8,6 +20,20 @@ from streamlit_sortables import sort_items
 # 初期設定
 st.set_page_config(page_title="AI ito Game", page_icon="🃏", layout="centered")
 client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
+
+# タイトル設定
+st.components.v1.html(
+    f"""
+    <script>
+        window.parent.document.title = "AI ito Game";
+        var meta = window.parent.document.createElement('meta');
+        meta.setAttribute('property', 'og:title');
+        meta.content = "AI ito Game";
+        window.parent.document.getElementsByTagName('head')[0].appendChild(meta);
+    </script>
+    """,
+    height=0,
+)
 
 # プレイヤーごとのカラー
 PLAYER_COLORS = ["#A6D8E4", "#FFB6C1", "#B5EAD7", "#A5BFE8", "#FFF9C4", "#FFC4B8"]
