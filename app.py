@@ -1,15 +1,3 @@
-st.components.v1.html(
-    f"""
-    <script>
-        window.parent.document.title = "AI ito Game";
-        var meta = window.parent.document.createElement('meta');
-        meta.setAttribute('property', 'og:title');
-        meta.content = "AI ito Game";
-        window.parent.document.getElementsByTagName('head')[0].appendChild(meta);
-    </script>
-    """,
-    height=0,
-)
 import streamlit as st
 import random
 import os
